@@ -45,6 +45,7 @@ public class PacienteController {
                 .telefone(p.getTelefone())
                 .altura(p.getAltura())
                 .peso(p.getPeso())
+                .sexo(p.getSexo())
                 .build();
         return ResponseEntity.ok(bd.addPaciente(paciente));
     }
