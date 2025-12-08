@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/paciente")
@@ -51,30 +52,35 @@ public class PacienteController {
     @GetMapping("/getIMC/{id}")
     public ResponseEntity getIMC(@PathVariable long id) {
         Paciente p = bd.getPaciente(id);
-        Double imc = (double) p.getPeso() / (p.getAltura())* p.getAltura();
-        return ResponseEntity.ok(imc);
+        float peso = p.getPeso();
+        float altura = p.getAltura();
+        double imc = peso / (altura * altura);
+
+        return ResponseEntity.ok(Map.of("imc", imc));
     }
 
     @GetMapping("/getTMB/{id}")
-    public ResponseEntity getTMB(@PathVariable long id) {
-        return ResponseEntity.ok(tmb(id));
+    public ResponseEntity<?> getTMB(@PathVariable long id) {
+        Double valorTmb = tmb(id);
+        return ResponseEntity.ok(Map.of("tmb", valorTmb));
     }
 
     public Double tmb(long id) {
         Paciente p = bd.getPaciente(id);
         Integer idade = Period.between(p.getDataNascimento(), LocalDate.now()).getYears();
         Double tmb;
+        double alturaCm = p.getAltura() * 100;
         if ( p.getSexo() == Pessoa.Sexo.MASCULINO ) {
-            tmb = (10*p.getPeso())+(6.25*p.getAltura())-(5*idade)+5;
+            tmb = (10*p.getPeso())+(6.25*alturaCm)-(5*idade)+5;
         } else {
-            tmb = (10*p.getPeso())+(6.25*p.getAltura())-(5*idade)-161;
+            tmb = (10*p.getPeso())+(6.25*alturaCm)-(5*idade)-161;
         }
         return tmb;
     }
 
     @GetMapping("/getGCD/{id}")
     public ResponseEntity getGCD(@PathVariable long id, @RequestParam int nivel) throws Exception {
-        return ResponseEntity.ok(gcd(id, nivel));
+        return ResponseEntity.ok(Map.of("gcd", gcd(id, nivel)));
     }
 
     public Double gcd(long id, int nivel) throws Exception {
@@ -103,6 +109,7 @@ public class PacienteController {
         } else {
             metaCal = gcd+300;
         }
-        return ResponseEntity.ok(metaCal);
+        metaCal = Math.round(metaCal * 100.0) / 100.0;
+        return ResponseEntity.ok(Map.of("metaCal", metaCal));
     }
 }
